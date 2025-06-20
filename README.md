@@ -1,22 +1,68 @@
-# Pollution-Forecasting
-SARIMA model to predict pollution levels 
+# Time Series Project: Pollution Analysis in New Delhi
+# Context
+The primary aim of this project was to perform a time series forecast on pollution data from a specific locality (Rohini) within New Delhi, India. This project was motivated by a personal interest in environmental data analysis and its potential implications for understanding historical pollution levels, particularly focusing on Particulate Matter 2.5 (PM2.5). PM2.5 is a critical air pollutant due to its small size, which allows deep lung penetration and significant health impacts, making its analysis and forecasting highly relevant for environmental health departments.
 
-AIM: To create a Time Series Forecast on Pollution data from a locality within New Delhi India.
+# Actions & Techniques Applied
+Data Acquisition and Initial Inspection:
 
-WHY?: I am personally interested to see how this can be done and as a result what the possible implications could be if I worked within enviromental department looking at historical pollution levels.
+The pollution dataset (DL024-Rohini.csv) was loaded into a pandas DataFrame.
 
-The dataset had a lot of features I could have focussed on but I chose to look at Particulate Matter 2.5."Particulate matter" (PM) or "particle pollution" is a mixture of tiny solid particles and liquid droplets suspended in the air. These particles come in various sizes and shapes and can be composed of hundreds of different chemicals.The "2.5" in PM2.5 refers to its size. PM2.5 are fine inhalable particles with a diameter of 2.5 micrometers (µm) or less.
+Initial data inspection involved viewing the first few rows (rohini_data.head()) and checking data types and non-null counts (rohini_data.info()) to identify initial data quality issues.
 
-PM2.5 particles can originate from various sources, both natural and human-made:
+Missing values for each column were quantified using isnull().sum().
 
-Combustion sources: This is a major contributor. Vehicle exhausts (cars, trucks, buses) Industrial processes (power plants, factories) Burning wood (wood heaters, wildfires) Agricultural burning Complex atmospheric reactions: Many particles form in the atmosphere as a result of chemical reactions between pollutants like sulfur dioxide and nitrogen oxides (from power plants, industries, and vehicles). Other sources: Dust, dirt, soot, smoke. 4. 
+# Data Cleaning & Preprocessing:
 
-Why is PM2.5 a concern for health?
+The dataset was filtered to focus on primary pollutants, creating a new DataFrame primary_pollutants containing 'Date', 'PM2.5 (ug/m3)', 'PM10 (ug/m3)', 'NO2 (ug/m3)', 'CO (mg/m3)', and 'SO2 (ug/m3)'.
 
-Because of their extremely small size, PM2.5 particles are the most dangerous air pollutant:
+The 'Date' column was converted to datetime objects using a specified format (%d/%m/%Y).
 
-Deep lung penetration: Unlike larger particles (PM10) that tend to get filtered in the nose and throat or settle in the upper airways, PM2.5 particles are so small they can travel deep into your respiratory tract, reaching the deepest parts of your lungs. Entry into bloodstream: Some particles can even pass from the lungs into the bloodstream and be transported throughout the body, affecting various organs. Serious health impacts: Exposure to PM2.5 is linked to a wide range of severe health problems, both short-term and long-term: Respiratory issues: Asthma attacks, acute and chronic bronchitis, reduced lung function, coughing, wheezing, shortness of breath. Cardiovascular problems: Increased risk of heart attacks, strokes, irregular heartbeats, increased hospital admissions for heart disease. Other serious conditions: Lung cancer, lower respiratory infections (like pneumonia), type 2 diabetes, adverse birth outcomes, and emerging evidence suggests links to dementia. Vulnerable populations: Children, older adults, pregnant women, and individuals with pre-existing heart or lung diseases are particularly sensitive to PM2.5 exposure. 5. 
+The 'Date' column was set as the DataFrame index to facilitate time series operations.
 
-How is PM2.5 measured?
+Missing values across all primary pollutant columns were imputed using a backward fill (fillna(method='bfill')) to ensure data continuity.
 
-PM2.5 concentrations are typically measured in micrograms per cubic meter of air (μg/m 3).
+Time Series Resampling:
+
+The data was resampled to daily averages (resample('D').mean()) to smooth out high-frequency noise and reveal underlying daily patterns.
+
+Further resampling to monthly averages (resample('M').mean()) was performed to observe longer-term trends and prepare data for stationarity testing and modeling.
+
+# Time Series Visualization:
+
+Daily PM2.5 Trends: A line plot of daily average PM2.5 concentrations was generated, visualizing the fluctuations and overall patterns over the project's timeframe.
+
+
+Monthly PM2.5 Trends: A line plot of monthly average PM2.5 concentrations was created to show a smoother representation of the pollution trends, highlighting seasonal patterns.
+
+
+Contextual Markers: Both daily and monthly plots included:
+
+A horizontal red dashed line representing the WHO (World Health Organization) safety threshold for annual mean PM2.5 (35μg/m 
+3
+ ).
+
+Vertical green dotted lines indicating specific Diwali dates to observe the impact of festival-related emissions.
+
+Vertical red dotted lines marking COVID-19 lockdown periods to analyze the effect of reduced anthropogenic activities.
+
+# Stationarity Analysis:
+
+Augmented Dickey-Fuller (ADF) Test: The ADF test was performed on the monthly average PM2.5 series to formally check for stationarity. The p-value obtained (0.5928) was greater than 0.05, leading to the conclusion that the time series was likely non-stationary, requiring differencing for forecasting models.
+
+Autocorrelation (ACF) and Partial Autocorrelation (PACF) Plots: These plots were generated for the monthly PM2.5 series to identify patterns (e.g., seasonality, trend) and determine appropriate parameters for ARIMA/SARIMA models.
+
+
+# Differencing:
+
+To address non-stationarity, first-order differencing (.diff()) was applied to the monthly average PM2.5 data, creating a PM2.5_diff column. This transformation is a common step to achieve stationarity, which is required for many time series forecasting models.
+
+# Results
+Comprehensive Data Preparation: The project successfully demonstrated robust data cleaning, handling missing values, and transforming raw pollution data into a clean, time-indexed format suitable for advanced time series analysis.
+
+Clear Pollution Trend Identification: Visualizations effectively highlighted the temporal patterns of PM2.5 pollution in New Delhi, revealing periods of significantly elevated pollution (often exceeding WHO guidelines) and demonstrating the discernible impact of specific events like Diwali and COVID-19 lockdowns on air quality.
+
+Confirmed Non-Stationarity: Statistical testing (ADF test) confirmed the non-stationary nature of the PM2.5 time series, underscoring the necessity for differencing or other transformations for accurate forecasting.
+
+Foundation for Forecasting: The ACF and PACF plots, combined with differencing, laid the groundwork for selecting appropriate ARIMA or Seasonal ARIMA (SARIMA) model parameters, indicating an understanding of correlation structures and guiding future forecasting efforts.
+
+Insights into Environmental Impact: The analysis provided valuable insights into the fluctuating pollution levels and external factors influencing air quality in New Delhi, which could inform environmental policy and public health interventions.
